@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ dilema.titulo }} - Sapientia</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    <style>
+        /* Estilo para a caixa de chat e mensagens */
+        #chat-box {
+            height: 450px;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 1px solid #495057;
+            border-radius: .5rem;
+            margin-bottom: 1rem;
+        }
+        .message {
+            max-width: 75%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #0d6efd;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        .ai-message {
+            background-color: #495057;
+            color: white;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">Sapientia</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Início</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'dilema_list' %}">Dilemas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Meu Diário</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header p-3">
+                <h1 class="h4 mb-0">{{ dilema.titulo }}</h1>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted fst-italic">{{ dilema.descricao }}</p>
+                <hr class="border-secondary">
+
+                <div id="chat-box">
+                    {% for mensagem in mensagens %}
+                        <div class="d-flex {% if mensagem.remetente == 'USUARIO' %}justify-content-end{% else %}justify-content-start{% endif %} mb-2">
+                            <div class="message {% if mensagem.remetente == 'USUARIO' %}user-message{% else %}ai-message{% endif %}">
+                                {{ mensagem.conteudo|linebreaksbr }}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-center text-muted">Ainda não há mensagens. Envie a primeira para começar a reflexão.</p>
+                    {% endfor %}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" name="mensagem" class="form-control bg-dark text-white border-secondary" placeholder="Digite sua reflexão..." required autocomplete="off" autofocus>
+                        <button type="submit" class="btn btn-primary-custom">Enviar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Sapientia. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        window.onload = function() {
+            const chatBox = document.getElementById('chat-box');
+            if(chatBox) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        };
+    </script>
+
+</body>
+</html>

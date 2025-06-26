@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapientia - Página Inicial</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">Sapientia</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#">Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dilema_list' %}">Dilemas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Meu Diário</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+
+        <header class="hero-section text-center">
+            <h1 class="display-5 fw-bold">Bem-vindo à Plataforma Sapientia</h1>
+            <p class="lead">Um espaço para explorar a ética, a reflexão e o pensamento filosófico.</p>
+        </header>
+
+        <main>
+            <hr class="section-divider">
+            <h2 class="text-center mb-4">Filósofo em Destaque</h2>
+            
+            {% if filosofo %}
+            <div class="card filosofo-card-novo overflow-hidden mx-auto shadow-lg" style="max-width: 900px;">
+                <div class="row g-0">
+                    <div class="col-md-4 filosofo-img-container">
+                        <img src="{{ filosofo.imagem_url }}" class="filosofo-img" alt="Foto de {{ filosofo.nome }}">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body p-5">
+                        
+                        <blockquote class="filosofo-quote-text">
+                            "{{ filosofo.citacao_destaque }}"
+                        </blockquote>
+
+                        <h4 class="card-title mt-4">{{ filosofo.nome }}</h4>
+                        <h6 class="card-subtitle text-muted">{{ filosofo.periodo_historico }}</h6>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                Nenhum filósofo cadastrado ainda. Adicione um no painel de administração.
+            </div>
+            {% endif %}
+
+            <hr class="section-divider">
+
+            <section class="text-center">
+                <h2>Explore os Dilemas</h2>
+                <p class="lead text-muted">Enfrente cenários complexos e reflita sobre suas escolhas com a ajuda da IA.</p>
+                <div class="row mt-4">
+                    {% for dilema in ultimos_dilemas %}
+                    <div class="col-lg-4 mb-4">
+                        <div class="card preview-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ dilema.titulo }}</h5>
+                                <p class="card-text text-muted">{{ dilema.descricao|truncatechars:200 }}</p>
+                                <a href="{% url 'dilema_list' %}" class="btn btn-primary-custom">Ver todos os dilemas</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>Nenhum dilema cadastrado no momento.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <hr class="section-divider">
+
+            <section class="feature-section text-center hero-section">
+                <h2 class="fw-bold">Descubra seu Perfil Filosófico</h2>
+                <p class="lead">Faça nosso teste e descubra com quais grandes escolas do pensamento suas ideias mais se alinham.</p>
+                <a href="#" class="btn btn-primary-custom btn-lg mt-3">Iniciar Teste</a>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Sapientia. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

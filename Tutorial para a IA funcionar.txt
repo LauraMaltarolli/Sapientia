@@ -1,0 +1,10 @@
+Crie um arquivo chamado .env
+
+Abra o google Studio Ai
+
+Pegue a sua API Key
+
+E coloque no arquivo .env da seguinte maneira:
+GEMINI_API_KEY=sua_chave_sem_espaco_nenhum
+
+OBS:No .gitgnore o arquivo .env já está listado para que o GitHub não o puxe
