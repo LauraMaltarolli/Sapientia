@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, ListView, DetailView, View
+from django.views.generic import TemplateView, ListView, DetailView, View, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
 import google.generativeai as genai
 from decouple import config
 from django.shortcuts import get_object_or_404, redirect
-
+from .forms import UsuarioCreateForm
+from django.urls import reverse_lazy
 
 class IndexView(View):
     def get(self, request, *args, **kwargs):
@@ -35,7 +37,7 @@ def get_gemini_response(prompt):
     response = model.generate_content(prompt)
     return response.text
 
-class DilemaDetailView(View):
+class DilemaDetailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         dilema = get_object_or_404(Dilema, pk=self.kwargs['pk'])
         sessao, created = SessaoReflexao.objects.get_or_create(
@@ -79,10 +81,18 @@ class TeoriaFilosoficaDetailView(DetailView):
     model = TeoriaFilosofica
     template_name = 'teoria_detail.html'
 
-class DiarioView(ListView):
+class DiarioView(LoginRequiredMixin, ListView):
     model = SessaoReflexao
     template_name = 'diario.html'
     context_object_name = 'sessoes'
 
+    def get_queryset(self):
+        return SessaoReflexao.objects.filter(usuario=self.request.user).order_by('-data_inicio')
+
 class CalculadoraEticaView(TemplateView):
     template_name = 'calculadora_etica.html'
+
+class CadastroView(CreateView):
+    form_class = UsuarioCreateForm
+    template_name = 'cadastro.html'
+    success_url = reverse_lazy('login')

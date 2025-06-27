@@ -190,3 +190,60 @@ footer> .container {
     background-color: #734fbb;
     border-color: #734fbb;
 }
+
+main .card-body {
+padding: 2rem;
+}
+
+main .form-group {
+margin-bottom: 1.5rem;
+}
+
+main label {
+display: block;
+color: #f8f9fa;
+margin-bottom: 0.5rem;
+}
+
+main input.form-control {
+background-color: #343a40; 
+color: #f8f9fa;
+border: 1px solid #495057;
+padding: 0.75rem;
+border-radius: 0.25rem;
+}
+
+main input.form-control:focus {
+background-color: #495057;
+border-color: #8a63d2;
+outline: none;
+box-shadow: 0 0 0 0.2rem rgba(138, 99, 210, 0.25);
+}
+
+main input{
+    width: 100%;
+}
+
+.errorlist {
+    color: #e57373;
+    list-style-type: none;
+    padding: 0;
+    margin: 0.5rem 0 1rem 0; 
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #adb5bd; /* Cor do ícone */
+    cursor: pointer;
+}

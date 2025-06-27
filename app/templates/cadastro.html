@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro - Sapientia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+        main .card{
+            max-width: 600px;
+            margin: 3rem auto;
+        }
+
+        main .btn-primary-custom {
+            width: 100%;
+            padding: 0.8rem;
+            font-weight: bold;
+        }
+
+        main .text-center a:hover {
+            color: #f8f9fa;
+            text-decoration: underline;
+        }
+
+        main .text-center a {
+            color: #adb5bd;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-body">
+                        <h1 class="text-center mb-4">Crie sua Conta</h1>
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="{{ form.username.id_for_label }}">Nome de usuário:</label>
+                                {{ form.username }}
+                                {{ form.username.errors }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.first_name.id_for_label }}">Nome:</label>
+                                {{ form.first_name }}
+                                {{ form.first_name.errors }}
+                            </div>
+                             <div class="form-group">
+                                <label for="{{ form.last_name.id_for_label }}">Sobrenome:</label>
+                                {{ form.last_name }}
+                                {{ form.last_name.errors }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.email.id_for_label }}">Email:</label>
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_data_nascimento">Data de Nascimento:</label>
+                                <input type="date" name="data_nascimento" class="form-control" id="id_data_nascimento">
+                                {{ form.data_nascimento.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.password1.id_for_label }}">Senha:</label>
+                                <div class="password-wrapper">
+                                    {{ form.password1 }}
+                                    <button type="button" class="password-toggle-btn" onclick="togglePassword('{{ form.password1.id_for_label }}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+                                    </button>
+                                </div>
+                                {{ form.password1.errors }}
+                            </div>
+                            <ul>
+                                <li>A senha deve conter pelo menos 8 caracteres</li>
+                                <li>A senha não deve ser inteiramente numérica</li>
+                            </ul>
+
+                            <div class="form-group">
+                                <label for="{{ form.password2.id_for_label }}">Confirmação de senha:</label>
+                                <div class="password-wrapper">
+                                    {{ form.password2 }}
+                                    <button type="button" class="password-toggle-btn" onclick="togglePassword('{{ form.password2.id_for_label }}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+                                    </button>
+                                </div>
+                                {{ form.password2.errors }}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary-custom">Cadastrar</button>
+                        </form>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'login' %}">Já tem uma conta? Faça login</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Função para ver/ocultar senha
+        function togglePassword(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const button = passwordField.nextElementSibling;
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            // Troca a opacidade do ícone para dar um feedback visual
+            button.style.opacity = (type === 'text') ? '1' : '0.6';
+        }
+
+    </script>
+</body>
+</html>
