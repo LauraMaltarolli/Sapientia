@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Perfil Filosófico - Sapientia</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    <style>
+        /* Estilos para a transição suave entre as perguntas */
+        .question-slide {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">Sapientia</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item ms-lg-3">
+                        <a href="{% url 'index' %}" class="btn btn-danger btn-sm">Sair do Teste</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5">
+        <header class="text-center mb-5">
+            <h1 class="display-5 fw-bold">{{ teste.titulo }}</h1>
+            <p class="lead text-muted">Responda às perguntas abaixo para descobrir seu perfil.</p>
+        </header>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% if resultado %}
+                    <div class="card bg-dark border-secondary text-center p-5">
+                        <h2 class="h3">Seu resultado é:</h2>
+                        <p class="display-4 my-4" style="color: #8A63D2;">{{ resultado }}</p>
+                        <p class="text-muted">Isso sugere que suas respostas se alinham mais com os princípios desta escola filosófica.</p>
+                        <a href="{% url 'teste' %}" class="btn btn-primary-custom mt-3">Fazer o teste novamente</a>
+                    </div>
+                {% else %}
+                    <div id="quiz-container">
+                        <div class="progress mb-4" style="height: 25px;">
+                            <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background-color: #8A63D2;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p id="progress-text" class="text-center text-muted"></p>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            {% for pergunta_data in teste.perguntas %}
+                                <div class="question-slide" data-question-index="{{ forloop.counter0 }}">
+                                    <div class="card bg-dark border-secondary mb-4">
+                                        <div class="card-header fw-bold fs-5">
+                                            {{ pergunta_data.pergunta }}
+                                        </div>
+                                        <div class="card-body">
+                                            {% for escola, opcao_texto in pergunta_data.opcoes.items %}
+                                                <div class="form-check mb-3">
+                                                    <input class="form-check-input" type="radio" name="pergunta_{{ forloop.parentloop.counter0 }}" id="opcao_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" value="{{ escola }}" required>
+                                                    <label class="form-check-label" for="opcao_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}">
+                                                        {{ opcao_texto }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" id="prev-btn" class="btn btn-secondary">Anterior</button>
+                                <button type="button" id="next-btn" class="btn btn-primary-custom">Próxima</button>
+                                <button type="submit" id="submit-btn" class="btn btn-primary-custom btn-lg d-none">Ver Meu Perfil</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Sapientia. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const quizContainer = document.getElementById('quiz-container');
+            if (!quizContainer) return; // Só executa o script se o quiz estiver na página
+
+            const questionSlides = document.querySelectorAll('.question-slide');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            let currentQuestionIndex = 0;
+            const totalQuestions = questionSlides.length;
+
+            function showQuestion(index) {
+                // Esconde todas as perguntas
+                questionSlides.forEach(slide => slide.style.display = 'none');
+                
+                // Mostra a pergunta atual
+                questionSlides[index].style.display = 'block';
+
+                // Atualiza a barra de progresso
+                const progressPercentage = ((index + 1) / totalQuestions) * 100;
+                progressBar.style.width = progressPercentage + '%';
+                progressBar.setAttribute('aria-valuenow', progressPercentage);
+                progressText.textContent = `Pergunta ${index + 1} de ${totalQuestions}`;
+
+                // Controla a visibilidade dos botões
+                prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
+                nextBtn.style.display = index === totalQuestions - 1 ? 'none' : 'inline-block';
+                submitBtn.style.display = index === totalQuestions - 1 ? 'inline-block' : 'none';
+            }
+
+            nextBtn.addEventListener('click', () => {
+                // Valida se uma opção foi marcada antes de avançar
+                const currentRadios = questionSlides[currentQuestionIndex].querySelectorAll('input[type="radio"]');
+                if (Array.from(currentRadios).some(radio => radio.checked)) {
+                    if (currentQuestionIndex < totalQuestions - 1) {
+                        currentQuestionIndex++;
+                        showQuestion(currentQuestionIndex);
+                    }
+                } else {
+                    alert('Por favor, selecione uma opção para continuar.');
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    showQuestion(currentQuestionIndex);
+                }
+            });
+
+            // Mostra a primeira pergunta ao carregar a página
+            showQuestion(currentQuestionIndex);
+        });
+    </script>
+</body>
+</html>

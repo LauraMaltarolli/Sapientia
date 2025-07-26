@@ -27,4 +27,8 @@ urlpatterns = [
     path('meu-diario/', DiarioView.as_view(), name='diario'),
     path('contas/cadastro/', CadastroView.as_view(), name='cadastro'),
     path('contas/', include('django.contrib.auth.urls')),
+    path('teste/', TesteFilosoficoView.as_view(), name='teste'),
+    path('teorias/', TeoriaFilosoficaListView.as_view(), name='teoria_list'),
+    path('teorias/<int:pk>/', TeoriaFilosoficaDetailView.as_view(), name='teoria_detail'),
+    path('dilemas/criar/', DilemaCreateView.as_view(), name='dilema_create'),
 ]

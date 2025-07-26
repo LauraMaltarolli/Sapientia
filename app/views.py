@@ -5,13 +5,13 @@ from .models import *
 import google.generativeai as genai
 from decouple import config
 from django.shortcuts import get_object_or_404, redirect
-from .forms import UsuarioCreateForm
+from .forms import *
 from django.urls import reverse_lazy
+from collections import Counter
 
 class IndexView(View):
     def get(self, request, *args, **kwargs):
         filosofo = Filosofo.objects.order_by('?').first()
-        # Nova linha: buscando os 3 últimos dilemas
         ultimos_dilemas = Dilema.objects.order_by('-data_criacao')[:3]
         
         context = {
@@ -20,11 +20,28 @@ class IndexView(View):
         }
         return render(request, 'index.html', context)
 
+
 class ComoFuncionaView(TemplateView):
     template_name = 'como_funciona.html'
 
-class DilemaCreateView(TemplateView):
+
+class DilemaCriadoForm(forms.ModelForm):
+    class Meta:
+        model = DilemaCriado
+        # Excluímos 'usuario_criador' pois ele será definido automaticamente
+        exclude = ('usuario_criador',)
+
+class DilemaCreateView(LoginRequiredMixin, CreateView):
+    model = DilemaCriado
+    form_class = DilemaCriadoForm
     template_name = 'dilema_create.html'
+    success_url = reverse_lazy('dilema_list') # Redireciona para a lista após sucesso
+
+    def form_valid(self, form):
+        # Associa o usuário logado ao dilema antes de salvar
+        form.instance.usuario_criador = self.request.user
+        return super().form_valid(form)
+
 
 class DilemaListView(ListView):
     model = Dilema
@@ -36,6 +53,7 @@ def get_gemini_response(prompt):
     model = genai.GenerativeModel('gemini-1.5-flash-latest')
     response = model.generate_content(prompt)
     return response.text
+
 
 class DilemaDetailView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -69,17 +87,55 @@ class DilemaDetailView(LoginRequiredMixin, View):
 
         return redirect('dilema_detail', pk=dilema.pk)
 
-class TesteFilosoficoView(TemplateView):
+
+class TesteFilosoficoView(LoginRequiredMixin, View):
     template_name = 'teste_filosofico.html'
+
+    def get(self, request, *args, **kwargs):
+        teste = TesteFilosofico.objects.first()
+        context = {
+            'teste': teste,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        teste = TesteFilosofico.objects.first()
+        respostas = []
+        
+        for i, pergunta_data in enumerate(teste.perguntas):
+            resposta = request.POST.get(f'pergunta_{i}')
+            if resposta:
+                respostas.append(resposta)
+
+        if not respostas:
+            resultado_final = "Indeterminado"
+        else:
+            contagem = Counter(respostas)
+            resultado_final = contagem.most_common(1)[0][0]
+
+        ResultadoTeste.objects.create(
+            usuario=request.user,
+            teste=teste,
+            resultado=resultado_final
+        )
+
+        context = {
+            'teste': teste,
+            'resultado': resultado_final,
+        }
+        return render(request, self.template_name, context)
+
 
 class TeoriaFilosoficaListView(ListView):
     model = TeoriaFilosofica
     template_name = 'teoria_list.html'
     context_object_name = 'teorias'
 
+
 class TeoriaFilosoficaDetailView(DetailView):
     model = TeoriaFilosofica
     template_name = 'teoria_detail.html'
+
 
 class DiarioView(LoginRequiredMixin, ListView):
     model = SessaoReflexao
@@ -89,10 +145,12 @@ class DiarioView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return SessaoReflexao.objects.filter(usuario=self.request.user).order_by('-data_inicio')
 
+
 class CalculadoraEticaView(TemplateView):
     template_name = 'calculadora_etica.html'
+
 
 class CadastroView(CreateView):
     form_class = UsuarioCreateForm
     template_name = 'cadastro.html'
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('index')

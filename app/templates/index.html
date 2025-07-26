@@ -22,8 +22,30 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Início</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'dilema_list' %}">Dilemas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'diario' %}">Meu Diário</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'teoria_list' %}">Teorias</a></li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'diario' %}">Meu Diário</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Olá, {{ user.first_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Sair (Logout)</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item ms-lg-2">
+                            <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Login</a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a href="{% url 'cadastro' %}" class="btn btn-primary-custom btn-sm">Cadastrar</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -93,7 +115,7 @@
             <section class="feature-section text-center hero-section">
                 <h2 class="fw-bold">Descubra seu Perfil Filosófico</h2>
                 <p class="lead">Faça nosso teste e descubra com quais grandes escolas do pensamento suas ideias mais se alinham.</p>
-                <a href="#" class="btn btn-primary-custom btn-lg mt-3">Iniciar Teste</a>
+                <a href="{% url 'teste' %}" class="btn btn-primary-custom btn-lg mt-3">Iniciar Teste</a>
             </section>
 
         </main>

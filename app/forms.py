@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm
-from .models import Usuario
+from .models import Usuario, DilemaCriado
 from datetime import date
 from django import forms
 
@@ -34,3 +34,20 @@ class UsuarioCreateForm(UserCreationForm):
                 raise forms.ValidationError("Você deve ter pelo menos 10 anos para se cadastrar.", code='idade_invalida')
             
         return data_nascimento
+    
+class DilemaCriadoForm(forms.ModelForm):
+    class Meta:
+        model = DilemaCriado
+        # Excluímos 'usuario_criador' pois ele será definido automaticamente na view.
+        exclude = ('usuario_criador',)
+        
+        # Opcional: Adicionando placeholders e ajuda para os campos
+        widgets = {
+            'protagonista': forms.TextInput(attrs={'placeholder': 'Ex: Um médico, um estudante, um robô...'}),
+            'objetivo': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ex: Salvar um paciente, passar em uma prova, entender a consciência humana...'}),
+            'conflito': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ex: O único remédio disponível pode ter efeitos colaterais graves, o tempo para estudar é limitado e exige um sacrifício...'}),
+            'opcao1': forms.TextInput(attrs={'placeholder': 'Ex: Administrar o remédio mesmo assim.'}),
+            'opcao2': forms.TextInput(attrs={'placeholder': 'Ex: Não administrar o remédio e procurar alternativas.'}),
+            'solucao_do_criador': forms.TextInput(attrs={'placeholder': 'Qual das duas opções você escolheria?'}),
+            'justificativa_do_criador': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Por que você fez essa escolha?'}),
+        }
