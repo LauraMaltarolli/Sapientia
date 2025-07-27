@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect
 from .forms import *
 from django.urls import reverse_lazy
 from collections import Counter
+from django.core.exceptions import PermissionDenied
 
 class IndexView(View):
     def get(self, request, *args, **kwargs):
@@ -35,13 +36,45 @@ class DilemaCreateView(LoginRequiredMixin, CreateView):
     model = DilemaCriado
     form_class = DilemaCriadoForm
     template_name = 'dilema_create.html'
-    success_url = reverse_lazy('dilema_list') # Redireciona para a lista após sucesso
+    success_url = reverse_lazy('diario') # Redireciona para a lista após sucesso
 
     def form_valid(self, form):
         # Associa o usuário logado ao dilema antes de salvar
         form.instance.usuario_criador = self.request.user
         return super().form_valid(form)
 
+
+class DilemaCriadoDetailView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        dilema_criado = get_object_or_404(DilemaCriado, pk=self.kwargs['pk'])
+        
+        # Garante que apenas o criador possa ver o chat
+        if dilema_criado.usuario_criador != request.user:
+            raise PermissionDenied
+
+        mensagens = dilema_criado.mensagens.all()
+        context = {
+            'dilema_criado': dilema_criado,
+            'mensagens': mensagens
+        }
+        return render(request, 'meu_dilema_detail.html', context)
+
+    def post(self, request, *args, **kwargs):
+        dilema_criado = get_object_or_404(DilemaCriado, pk=self.kwargs['pk'])
+
+        if dilema_criado.usuario_criador != request.user:
+            raise PermissionDenied
+
+        conteudo_usuario = request.POST.get('mensagem')
+        MensagemDilemaCriado.objects.create(dilema_criado=dilema_criado, remetente='USUARIO', conteudo=conteudo_usuario)
+
+        prompt = f"Analise o seguinte dilema ético criado por um usuário: O protagonista é '{dilema_criado.protagonista}', seu objetivo é '{dilema_criado.objetivo}', e o conflito é '{dilema_criado.conflito}'. As opções são '{dilema_criado.opcao1}' e '{dilema_criado.opcao2}'. O pensamento do usuário sobre isso é: '{conteudo_usuario}'. Aja como um filósofo socrático e faça uma pergunta curta para aprofundar a reflexão."
+        
+        resposta_ia = get_gemini_response(prompt)
+        MensagemDilemaCriado.objects.create(dilema_criado=dilema_criado, remetente='IA', conteudo=resposta_ia)
+
+        return redirect('meu_dilema_detail', pk=dilema_criado.pk)
+    
 
 class DilemaListView(ListView):
     model = Dilema
@@ -138,16 +171,70 @@ class TeoriaFilosoficaDetailView(DetailView):
 
 
 class DiarioView(LoginRequiredMixin, ListView):
-    model = SessaoReflexao
+    model = SessaoReflexao # Modelo principal para paginação
     template_name = 'diario.html'
-    context_object_name = 'sessoes'
+    context_object_name = 'sessoes_publicas'
 
     def get_queryset(self):
         return SessaoReflexao.objects.filter(usuario=self.request.user).order_by('-data_inicio')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Busca também os dilemas criados pelo usuário
+        context['dilemas_criados'] = DilemaCriado.objects.filter(usuario_criador=self.request.user).order_by('-id')
+        return context
 
 
-class CalculadoraEticaView(TemplateView):
+class CalculadoraEticaView(LoginRequiredMixin, View):
     template_name = 'calculadora_etica.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        # Coleta a ação inicial
+        descricao_acao = request.POST.get('descricao_acao')
+        
+        # Coleta as respostas das perguntas
+        respostas = {
+            'pergunta_intencao': request.POST.get('pergunta_1'),
+            'pergunta_regra': request.POST.get('pergunta_2'),
+            'pergunta_consequencia': request.POST.get('pergunta_3'),
+        }
+
+        # Lógica de Pontuação Simples
+        pontos = 0
+        if respostas['pergunta_intencao'] == 'boa':
+            pontos += 150
+        elif respostas['pergunta_intencao'] == 'neutra':
+            pontos += 25
+        else: # 'egoista'
+            pontos -= 200
+
+        if respostas['pergunta_regra'] == 'nao':
+            pontos += 100
+        else: # 'sim'
+            pontos -= 150
+
+        if respostas['pergunta_consequencia'] == 'positiva':
+            pontos += 200
+        elif respostas['pergunta_consequencia'] == 'mista':
+            pontos += 50
+        else: # 'negativa'
+            pontos -= 300
+        
+        # Salva a análise no banco de dados
+        AcaoAnalisada.objects.create(
+            usuario=request.user,
+            descricao_acao_inicial=descricao_acao,
+            respostas_do_usuario=respostas
+        )
+
+        context = {
+            'pontos': pontos,
+            'descricao_acao': descricao_acao
+        }
+        return render(request, self.template_name, context)
 
 
 class CadastroView(CreateView):

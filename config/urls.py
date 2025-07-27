@@ -31,4 +31,6 @@ urlpatterns = [
     path('teorias/', TeoriaFilosoficaListView.as_view(), name='teoria_list'),
     path('teorias/<int:pk>/', TeoriaFilosoficaDetailView.as_view(), name='teoria_detail'),
     path('dilemas/criar/', DilemaCreateView.as_view(), name='dilema_create'),
+    path('meus-dilemas/<int:pk>/', DilemaCriadoDetailView.as_view(), name='meu_dilema_detail'),
+    path('calculadora/', CalculadoraEticaView.as_view(), name='calculadora'),
 ]

@@ -29,26 +29,28 @@
     </nav>
 
     <main class="container mt-5">
-        <header class="text-center mb-5">
-            <h1 class="display-5 fw-bold">Meu Diário de Reflexões</h1>
-            <p class="lead text-muted">Aqui estão todas as suas conversas passadas, prontas para serem revisitadas.</p>
-        </header>
+        <h2 class="h4 mb-3">Meus Dilemas Criados</h2>
+        {% for dilema in dilemas_criados %}
+            <a href="{% url 'meu_dilema_detail' pk=dilema.pk %}" class="list-group-item ...">
+                <h5 class="mb-1 text-light">Seu dilema: {{ dilema.protagonista }}</h5>
+                <p class="mb-1 text-muted">Clique para conversar com a IA sobre sua criação.</p>
+            </a>
+        {% empty %}
+            <p class="text-muted">Você ainda não criou nenhum dilema. <a href="{% url 'dilema_create' %}">Crie o primeiro!</a></p>
+        {% endfor %}
 
-        <div class="list-group">
-            {% for sessao in sessoes %}
-                <a href="{% url 'dilema_detail' pk=sessao.dilema.pk %}" class="list-group-item list-group-item-action bg-dark text-white border-secondary mb-2 rounded">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1 text-primary-custom">{{ sessao.dilema.titulo }}</h5>
-                        <small>{{ sessao.data_inicio|date:"d/m/Y" }}</sall>
-                    </div>
-                    <p class="mb-1 text-muted">Revisite sua conversa sobre este dilema.</p>
-                </a>
-            {% empty %}
-                <div class="alert alert-info">
-                    Você ainda não iniciou nenhuma reflexão. Vá para a página de <a href="{% url 'dilema_list' %}" class="alert-link">Dilemas</a> para começar!
-                </div>
-            {% endfor %}
-        </div>
+        <hr class="section-divider">
+
+        <h2 class="h4 mb-3">Minhas Reflexões em Dilemas Públicos</h2>
+        {% for sessao in sessoes_publicas %}
+            <a href="{% url 'dilema_detail' pk=sessao.dilema.pk %}" class="list-group-item ...">
+                <h5 class="mb-1 text-light">{{ sessao.dilema.titulo }}</h5>
+                <small>{{ sessao.data_inicio|date:"d/m/Y" }}</small>
+                <p class="mb-1 text-muted">Clique para reler a conversa completa.</p>
+            </a>
+        {% empty %}
+            <p class="text-muted">Você ainda não discutiu nenhum dilema público.</p>
+        {% endfor %}
     </main>
 
     <footer class="footer">

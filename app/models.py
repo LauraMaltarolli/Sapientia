@@ -128,6 +128,29 @@ class DilemaCriado(models.Model):
     def __str__(self):
         return f"Dilema criado por {self.usuario_criador}"
 
+class MensagemDilemaCriado(models.Model):
+    class Remetente(models.TextChoices):
+        USUARIO = 'USUARIO', 'Usuário'
+        IA = 'IA', 'IA'
+
+    dilema_criado = models.ForeignKey(
+        DilemaCriado,
+        on_delete=models.CASCADE,
+        related_name='mensagens',
+        verbose_name="Dilema Criado"
+    )
+    remetente = models.CharField(max_length=7, choices=Remetente.choices, verbose_name="Remetente")
+    conteudo = models.TextField(verbose_name="Conteúdo")
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Timestamp")
+
+    class Meta:
+        verbose_name = "Mensagem de Dilema Criado"
+        verbose_name_plural = "Mensagens de Dilemas Criados"
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"Mensagem em '{self.dilema_criado.protagonista}' às {self.timestamp.strftime('%H:%M')}"
+
 class Filosofo(models.Model):
     nome = models.CharField(max_length=150, verbose_name="Nome")
     imagem_url = models.URLField(max_length=255, verbose_name="URL da Imagem")

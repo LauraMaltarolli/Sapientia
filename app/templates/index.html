@@ -22,6 +22,7 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Início</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'dilema_list' %}">Dilemas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'calculadora' %}">Calculadora Ética</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'teoria_list' %}">Teorias</a></li>
                     {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'diario' %}">Meu Diário</a></li>
